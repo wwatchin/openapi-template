@@ -1,4 +1,4 @@
-# PRODUCT NAME
+# openapi-template
 The template of OpenAPI spec.
 This repository is for personal use.
 
