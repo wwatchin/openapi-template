@@ -1,0 +1,140 @@
+# -- Meta information for this specification -----------------------------------
+openapi: '3.0.3'
+info:
+  title: API Title
+  version: '1.0'
+  description: 'Template of OpenAPI specification.'
+  contact:
+    name: 'kWatanabe (@wwatchin)'
+    url: 'https://github.com/wwatchin'
+    # email: 'kwatanabe@example.com'
+  license:
+    name: 'MIT License'
+    url: 'https://opensource.org/license/mit/'
+  # termsOfService: 'https://www.example.com/eula.html'
+# externalDocs:
+#   description: 'Find more information from this document.'
+#   url: 'http://www.example.com/moreinfo.html'
+
+# -- List of tags --------------------------------------------------------------
+tags:
+  - name: resource
+    description: 'Management resouces.'
+
+# -- List of servers -----------------------------------------------------------
+servers:
+  - url: https://api.example.com/v1
+    description: 'production'
+  - url: 'https://devel.example.com/v1'
+    description: 'development'
+
+# -- Components ----------------------------------------------------------------
+# MEMO:
+#  scheme of http auth (cf. https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml)
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        errno:
+          type: integer
+          format: int32
+          description: "Error number."
+        detail:
+          type: string
+          description: "Error messages."
+        debug:
+          type: string
+          description: "Debug messages."
+      required:
+        - 'errno'
+        - 'detail'
+  securitySchemes:
+    bearer_auth:
+      type: http
+      description: 'Bearer authorization'
+      scheme: bearer
+      bearerFormat: 'JWT Token'
+
+# -- Paths ---------------------------------------------------------------------
+# MEMO:
+#  properties of schema (cf. https://spec.openapis.org/oas/v3.0.3#properties)
+#  Data types of schema (cf. https://spec.openapis.org/oas/v3.0.3#data-types)
+paths:
+  # -- /resource/{id} ----------------------------------------------------------
+  /resource/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: 'ID of this resource.'
+        required: true
+        deprecated: false
+        example: 100
+        schema:
+          type: integer
+          format: int64
+    # --------------------------------------------------------------------------
+    post:
+      tags: 
+        - resource
+      summary: 'Instruct an action.'
+      operationId: post-resouce
+      description: 'Instruct a resource to perform an action. The type of action is specified in the query.'
+      # externalDocs:
+        # description:
+        # url:
+      parameters:
+        - name: action
+          in : query
+          description: 'Type of action to invoke. (`start`, `stop` or `sleep`.)'
+          required: false
+          deprecated: false
+          schema:
+            type: string
+            default: 'start'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timeout:
+                  type: integer
+                  format: int32
+                  description: 'Specify the time in seconds until timeout.'
+                  example: 10
+                debug:
+                  type: boolean
+                  description: 'Contain debug infomation into response.)'
+                  default: false
+              required:
+                - 'timeout'
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                    description: 'Time the action was completed.'
+                  result:
+                    type: string
+                    description: 'Output messages.'
+                  debug:
+                    type: string
+                    description: 'Debug messages.'
+                required:
+                  - "date"
+                  - "result"
+        '400':
+          description: 'Invalid ID or action.'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    # --------------------------------------------------------------------------
+  # -- /resource/{id} ----------------------------------------------------------

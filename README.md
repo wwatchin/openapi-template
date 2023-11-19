@@ -1,16 +1,8 @@
 # PRODUCT NAME
-DESCRIPTION
-
-## Usage
-
-## Install
-### use binary release.
-
-### build from source.
+The template of OpenAPI spec.
+This repository is for personal use.
 
 ## License
 Copyright (c) Kazuki Watanabe (wwatchin).
 
-This software is released under the **XXXXX** License, see LICENSE.
-
-And see the LICENSES for the licenses of the dependent software.
+This software is released under the MIT License, see LICENSE.
