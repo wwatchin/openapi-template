@@ -18,11 +18,15 @@ info:
 
 # -- List of tags --------------------------------------------------------------
 tags:
+  - name: auth
+    description: 'Authentication and authorization.'
   - name: resource
     description: 'Management resouces.'
 
 # -- List of servers -----------------------------------------------------------
 servers:
+  - url: 'http://localhost:8000/'
+    description: 'localhost'
   - url: https://api.example.com/v1
     description: 'production'
   - url: 'https://devel.example.com/v1'
@@ -36,10 +40,6 @@ components:
     Error:
       type: object
       properties:
-        errno:
-          type: integer
-          format: int32
-          description: "Error number."
         detail:
           type: string
           description: "Error messages."
@@ -47,12 +47,10 @@ components:
           type: string
           description: "Debug messages."
       required:
-        - 'errno'
         - 'detail'
   securitySchemes:
     bearer_auth:
       type: http
-      description: 'Bearer authorization'
       scheme: bearer
       bearerFormat: 'JWT Token'
 
@@ -61,6 +59,54 @@ components:
 #  properties of schema (cf. https://spec.openapis.org/oas/v3.0.3#properties)
 #  Data types of schema (cf. https://spec.openapis.org/oas/v3.0.3#data-types)
 paths:
+  # -- /token ------------------------------------------------------------------
+  /token:
+    # --------------------------------------------------------------------------
+    post:
+      tags:
+        - auth
+      summary: 'Get an access token.'
+      operationId: get-token
+      description: 'Request authentication and obtain an access token.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                  description: 'Username.'
+                  example: 'user'
+                password:
+                  type: string
+                  description: 'Password that be encoded by BASE64.'
+                  example: 'cGFzc3dvcmQ='
+              required:
+                - 'user'
+                - 'password'
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: 'An access token.'
+                required:
+                  - "token"
+        '400':
+          description: 'Invalid username or password.'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    # --------------------------------------------------------------------------
+  # -- /token ------------------------------------------------------------------
+
   # -- /resource/{id} ----------------------------------------------------------
   /resource/{id}:
     parameters:
@@ -80,9 +126,8 @@ paths:
       summary: 'Instruct an action.'
       operationId: post-resouce
       description: 'Instruct a resource to perform an action. The type of action is specified in the query.'
-      # externalDocs:
-        # description:
-        # url:
+      security:
+        - bearer_auth: []
       parameters:
         - name: action
           in : query
@@ -103,10 +148,6 @@ paths:
                   format: int32
                   description: 'Specify the time in seconds until timeout.'
                   example: 10
-                debug:
-                  type: boolean
-                  description: 'Contain debug infomation into response.)'
-                  default: false
               required:
                 - 'timeout'
       responses:
@@ -117,10 +158,6 @@ paths:
               schema:
                 type: object
                 properties:
-                  date:
-                    type: string
-                    format: date
-                    description: 'Time the action was completed.'
                   result:
                     type: string
                     description: 'Output messages.'
@@ -128,7 +165,6 @@ paths:
                     type: string
                     description: 'Debug messages.'
                 required:
-                  - "date"
                   - "result"
         '400':
           description: 'Invalid ID or action.'
