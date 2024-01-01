@@ -19,7 +19,7 @@ run: main.py
 	$(PYTHON) -m uvicorn main:app --host $(UVICORN_IP) --port $(UVICORN_PORT)
 
 clean:
-	$(RM) main.py models.py sed*
+	$(RM) main.py models.py
 
 main.py: $(APISPEC) $(TEMPLATES)
 	fastapi-codegen -i $(APISPEC) -t $(TEMPLATE_DIR) -o .
