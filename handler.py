@@ -5,8 +5,11 @@
 # ------------------------------------------------------------------------------
 
 from models import *
+from error import *
 
 def do_validation(token):
+    if token != "TOKEN":
+        raise AuthorizationError("Invalid token.", 401)
     return {}
 
 def do_get_token(body):

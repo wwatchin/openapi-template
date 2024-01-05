@@ -9,9 +9,11 @@ from typing import Annotated
 
 {{imports}}
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import JSONResponse
 from handler import *
+from error import WebappException
 
 app = FastAPI(
     {% if info %}
@@ -27,6 +29,10 @@ app = FastAPI(
 
 def validation (cred: HTTPAuthorizationCredentials = Depends(HTTPBearer())) -> dict:
     return do_validation(token=cred.credentials)
+
+@app.exception_handler(WebappException)
+def webappexception_handler (request: Request, exception: WebappException):
+    return JSONResponse(status_code=exception.code, content={"detail": exception.message})
 
 {% for operation in operations %}
 @app.{{operation.type}}('{{operation.snake_case_path}}', response_model={{operation.response}})
